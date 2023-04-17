@@ -3,13 +3,16 @@
 #include "Map.h"
 #include "ECS\Components.h"
 #include "Vector2D.h"
+#include "Collision.h"
+
 Map* map;
 Manager manager;
 
 SDL_Renderer* Game::renderer = nullptr;
+SDL_Event Game::event;
 
 auto& player(manager.addEntity());
-
+auto& wall(manager.addEntity());
 Game::Game()
 {}
 
@@ -40,14 +43,19 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 
 	//ecs implementation
 
-	player.addComponent<TransformComponent>();
+	player.addComponent<TransformComponent>(2);
 	player.addComponent<SpriteComponent>("assets/player.png");
+	player.addComponent<KeyboardController>();
+	player.addComponent<ColliderComponent>("player");
 
+
+	wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
+	wall.addComponent<SpriteComponent>("assets/dirt.png");
+	wall.addComponent<ColliderComponent>("wall");
 }
 
 void Game::handleEvents()
 {
-	SDL_Event event;
 
 	SDL_PollEvent(&event);
 
@@ -65,10 +73,11 @@ void Game::update()
 {
 
 	manager.update();
-	player.getComponent<TransformComponent>().position.Add(Vector2D(5, 0));
-	if (player.getComponent<TransformComponent>().position.x > 100)
+
+	if (Collision::AABB(player.getComponent<ColliderComponent>().collider,
+		wall.getComponent<ColliderComponent>().collider))
 	{
-		player.getComponent<SpriteComponent>().setTex("assets/enemy.png");
+		std::cout << "wall hit!" << std::endl;
 	}
 }
 
