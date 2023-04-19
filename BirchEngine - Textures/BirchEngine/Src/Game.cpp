@@ -51,14 +51,14 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 
 		isRunning = true;
 	}
-	map = new Map();
+	Map* map = new Map();
 
 	//ecs implementation
 
 	Map::LoadMap("assets/p16x16.map", 16, 16);
 
 	player.addComponent<TransformComponent>(2);
-	player.addComponent<SpriteComponent>("assets/player.png");
+	player.addComponent<SpriteComponent>("assets/player_anims.png", true);
 	player.addComponent<KeyboardController>();
 	player.addComponent<ColliderComponent>("player");
 	player.addGroup(groupPlayer);
