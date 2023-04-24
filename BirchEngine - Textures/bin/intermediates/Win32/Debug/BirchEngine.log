@@ -1,5 +1,26 @@
 ﻿  Collision.cpp
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(23,16): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(24,16): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(37,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(38,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
   Game.cpp
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(23,16): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(24,16): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(37,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(38,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\Game.cpp(99,66): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\Game.cpp(100,66): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  main.cpp
   Map.cpp
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(11,11): error C3646: 'position': unknown override specifier
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(11,19): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(22,13): error C2653: 'TextureManager': is not a class or namespace name
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(22,29): error C3861: 'LoadTexture': identifier not found
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(23,3): error C2065: 'position': undeclared identifier
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(24,3): error C2065: 'position': undeclared identifier
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(37,16): error C2065: 'position': undeclared identifier
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(38,16): error C2065: 'position': undeclared identifier
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(43,3): error C2653: 'TextureManager': is not a class or namespace name
+C:\Dev\BirchEngine - Textures\BirchEngine\Src\ECS\TileComponent.h(43,19): error C3861: 'Draw': identifier not found
+  TextureManager.cpp
   Generating Code...
-  BirchEngine.vcxproj -> C:\Dev\BirchEngine - Textures\bin\Win32\Debug\BirchEngine.exe
