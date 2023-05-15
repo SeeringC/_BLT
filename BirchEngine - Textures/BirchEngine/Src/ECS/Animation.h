@@ -1,6 +1,8 @@
 #pragma once
+
 struct Animation
 {
+
 	int index;
 	int frames;
 	int speed;
@@ -12,4 +14,5 @@ struct Animation
 		frames = f;
 		speed = s;
 	}
+
 };

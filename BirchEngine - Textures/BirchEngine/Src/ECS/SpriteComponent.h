@@ -1,21 +1,22 @@
 #pragma once
 
 #include "Components.h"
-#include "SDL.h"	
+#include "SDL.h"
 #include "../TextureManager.h"
 #include "Animation.h"
 #include <map>
-	
+#include "../AssetManager.h"
+
 class SpriteComponent : public Component
 {
 private:
-	TransformComponent *transform;
+	TransformComponent * transform;
 	SDL_Texture *texture;
 	SDL_Rect srcRect, destRect;
 
 	bool animated = false;
-	int frames = 0; 
-	int speed = 100; //delay between each frames
+	int frames = 0;
+	int speed = 100;
 
 public:
 
@@ -25,12 +26,12 @@ public:
 	SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
 
 	SpriteComponent() = default;
-	SpriteComponent(const char* path)
-	{ 
-		setTex(path);
+	SpriteComponent(std::string id)
+	{
+		setTex(id);
 	}
 
-	SpriteComponent(const char* path, bool isAnimated)
+	SpriteComponent(std::string id, bool isAnimated)
 	{
 		animated = isAnimated;
 
@@ -40,23 +41,23 @@ public:
 		animations.emplace("Idle", idle);
 		animations.emplace("Walk", walk);
 
-
 		Play("Idle");
-		setTex(path);
+
+		setTex(id);
 	}
 
 	~SpriteComponent()
 	{
-		SDL_DestroyTexture(texture);
 	}
 
-	void setTex(const char* path)
+	void setTex(std::string id)
 	{
-		texture = TextureManager::LoadTexture(path);
+		texture = Game::assets->GetTexture(id);
 	}
 
 	void init() override
 	{
+
 		transform = &entity->getComponent<TransformComponent>();
 
 		srcRect.x = srcRect.y = 0;
@@ -66,6 +67,7 @@ public:
 
 	void update() override
 	{
+
 		if (animated)
 		{
 			srcRect.x = srcRect.w * static_cast<int>((SDL_GetTicks() / speed) % frames);
@@ -73,11 +75,10 @@ public:
 
 		srcRect.y = animIndex * transform->height;
 
-		destRect.x = static_cast<int>(transform->position.x) - Game::camera.x;
-		destRect.y = static_cast<int>(transform->position.y) - Game::camera.y;
+		destRect.x = static_cast<int>(transform->position.x - Game::camera.x);
+		destRect.y = static_cast<int>(transform->position.y - Game::camera.y);
 		destRect.w = transform->width * transform->scale;
 		destRect.h = transform->height * transform->scale;
-
 	}
 
 	void draw() override
@@ -91,4 +92,5 @@ public:
 		animIndex = animations[animName].index;
 		speed = animations[animName].speed;
 	}
+
 };

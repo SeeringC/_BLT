@@ -5,9 +5,9 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
+class AssetManager;
 class ColliderComponent;
+
 class Game
 {
 public:
@@ -24,17 +24,20 @@ public:
 
 	static SDL_Renderer *renderer;
 	static SDL_Event event;
-
 	static bool isRunning;
 	static SDL_Rect camera;
-	enum groupLabels : size_t
+	static AssetManager* assets;
+	enum groupLabels : std::size_t
 	{
 		groupMap,
-		groupPlayer,
-		groupColliders
+		groupPlayers,
+		groupColliders,
+		groupProjectiles,
+		groupGameState
 	};
 
 private:
+
 	int cnt = 0;
 	SDL_Window *window;
 };

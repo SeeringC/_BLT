@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AssetManager.cpp" />
     <ClCompile Include="Src\Collision.cpp" />
     <ClCompile Include="Src\ECS\ECS.cpp" />
     <ClCompile Include="Src\Game.cpp" />

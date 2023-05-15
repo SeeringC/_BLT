@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -7,14 +6,13 @@
 #include <bitset>
 #include <array>
 
-using namespace std;
-
 class Component;
 class Entity;
 class Manager;
 
-using ComponentID = size_t;
-using Group = size_t;
+using ComponentID = std::size_t;
+using Group = std::size_t;
+
 inline ComponentID getNewComponentTypeID()
 {
 	static ComponentID lastID = 0u;
@@ -25,28 +23,26 @@ template <typename T> inline ComponentID getComponentTypeID() noexcept
 {
 	static_assert (std::is_base_of<Component, T>::value, "");
 	static ComponentID typeID = getNewComponentTypeID();
-	/*static ComponentID typeID{ getNewComponentTypeID() };*/
 	return typeID;
 }
 
-constexpr size_t maxComponents = 32;
-constexpr size_t maxGroups = 32;
+const std::size_t maxComponents = 32;
+const std::size_t maxGroups = 32;
 
-using ComponentBitSet = bitset<maxComponents>;
-using GroupBitset = bitset<maxGroups>;
-using ComponentArray = array<Component*, maxComponents>;
+using ComponentBitSet = std::bitset<maxComponents>;
+using GroupBitset = std::bitset<maxGroups>;
+
+using ComponentArray = std::array<Component*, maxComponents>;
 
 class Component
 {
-public:
+public: 
 	Entity* entity;
 
 	virtual void init() {}
 	virtual void update() {}
 	virtual void draw() {}
-
 	virtual ~Component() {}
-
 };
 
 class Entity
@@ -54,33 +50,26 @@ class Entity
 private:
 	Manager& manager;
 	bool active = true;
-	vector<unique_ptr<Component>> components;
+	std::vector<std::unique_ptr<Component>> components;
 
 	ComponentArray componentArray;
-	ComponentBitSet componentBitSet;
-	GroupBitset groupBitset; 
+	ComponentBitSet componentBitset;
+	GroupBitset groupBitset;
 
 public:
 	Entity(Manager& mManager) : manager(mManager) {}
+
 	void update()
 	{
 		for (auto& c : components) c->update();
 	}
-
-	void draw()
+	void draw() 
 	{
 		for (auto& c : components) c->draw();
 	}
 
-	bool isActive() const 
-	{ 
-		return active; 
-	}
-
-	void destroy() 
-	{ 
-		active = false; 
-	}
+	bool isActive() const { return active; }
+	void destroy() { active = false; }
 
 	bool hasGroup(Group mGroup)
 	{
@@ -95,24 +84,26 @@ public:
 
 	template <typename T> bool hasComponent() const
 	{
-		return componentBitSet[getComponentTypeID<T>()];
+		return componentBitset[getComponentTypeID<T>()];
 	}
 
 	template <typename T, typename... TArgs>
 	T& addComponent(TArgs&&... mArgs)
 	{
-		T* c(new T(forward<TArgs>(mArgs)...));
+		T* c(new T(std::forward<TArgs>(mArgs)...));
 		c->entity = this;
-		unique_ptr<Component> uPtr{ c };
-		components.emplace_back(move(uPtr));
+		std::unique_ptr<Component>uPtr { c };
+		components.emplace_back(std::move(uPtr));
 
-		componentArray[getComponentTypeID<T>()] = c ;
-		componentBitSet[getComponentTypeID<T>()] = true;
+		componentArray[getComponentTypeID<T>()] = c;
+		componentBitset[getComponentTypeID<T>()] = true;
 
 		c->init();
 		return *c;
 	}
-	
+
+	//https://stackoverflow.com/questions/60150370/templates-and-universal-references
+
 	template<typename T> T& getComponent() const
 	{
 		auto ptr(componentArray[getComponentTypeID<T>()]);
@@ -123,57 +114,54 @@ public:
 class Manager
 {
 private:
-
-	vector<unique_ptr<Entity>> entities;
-	array<vector<Entity*>, maxGroups> groupedEntities;
+	std::vector<std::unique_ptr<Entity>> entities;
+	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
 public:
-
 	void update()
 	{
 		for (auto& e : entities) e->update();
 	}
-
 	void draw()
 	{
 		for (auto& e : entities) e->draw();
-	}
-
+	} 
 	void refresh()
 	{
-		//remove entity from group
 		for (auto i(0u); i < maxGroups; i++)
 		{
 			auto& v(groupedEntities[i]);
 			v.erase(
-				remove_if(begin(v), end(v), [i](Entity* mEntity)
-					{
-						return !mEntity->isActive() || !mEntity->hasGroup(i);
-					}),
-				end(v));
+				std::remove_if(std::begin(v), std::end(v),
+					[i](Entity* mEntity)
+			{
+				return !mEntity->isActive() || !mEntity->hasGroup(i);
+			}),
+				std::end(v));
 		}
 
-		entities.erase(remove_if(begin(entities), end(entities), [](const unique_ptr<Entity>& mEnitiy)
+		entities.erase(std::remove_if(std::begin(entities), std::end(entities),
+			[](const std::unique_ptr<Entity> &mEntity)
 		{
-				return !mEnitiy->isActive();
+			return !mEntity->isActive();
 		}),
-			end(entities));
+			std::end(entities));
 	}
-	
+
 	void AddToGroup(Entity* mEntity, Group mGroup)
 	{
 		groupedEntities[mGroup].emplace_back(mEntity);
 	}
 
-	vector<Entity*>& getGroup(Group mGroup)
+	std::vector<Entity*>& getGroup(Group mGroup)
 	{
 		return groupedEntities[mGroup];
 	}
 
 	Entity& addEntity()
 	{
-		Entity* e = new Entity(*this);
-		unique_ptr<Entity> uPtr{ e };
-		entities.emplace_back(move(uPtr));
+		Entity *e = new Entity(*this);
+		std::unique_ptr<Entity> uPtr { e };
+		entities.emplace_back(std::move(uPtr));
 		return *e;
 	}
 };

@@ -7,8 +7,9 @@
 class KeyboardController : public Component
 {
 public:
-	TransformComponent* transform;
-	SpriteComponent* sprite;
+	TransformComponent *transform;
+	SpriteComponent *sprite;
+
 	void init() override
 	{
 		transform = &entity->getComponent<TransformComponent>();
@@ -42,7 +43,7 @@ public:
 				break;
 			}
 		}
-
+	
 		if (Game::event.type == SDL_KEYUP)
 		{
 			switch (Game::event.key.keysym.sym)

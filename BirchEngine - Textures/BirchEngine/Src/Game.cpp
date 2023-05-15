@@ -1,11 +1,10 @@
 #include "Game.h"
 #include "TextureManager.h"
 #include "Map.h"
-#include "ECS\Components.h"
+#include "ECS/Components.h"
 #include "Vector2D.h"
 #include "Collision.h"
-
-using namespace std;
+#include "AssetManager.h"
 
 Map* map;
 Manager manager;
@@ -15,11 +14,12 @@ SDL_Event Game::event;
 
 SDL_Rect Game::camera = { 0,0,800,640 };
 
+AssetManager* Game::assets = new AssetManager(&manager);
 
 bool Game::isRunning = false;
+bool isEnd = false;
 
 auto& player(manager.addEntity());
-
 
 Game::Game()
 {}
@@ -47,26 +47,51 @@ void Game::init(const char* title, int width, int height, bool fullscreen)
 
 		isRunning = true;
 	}
-	Map* map = new Map("assets/terrain_ss.png", 3, 32);
 
+	assets->AddTexture("terrain", "assets/terrain_ss.png");
+	assets->AddTexture("player", "assets/player_anims.png");
+	assets->AddTexture("projectile", "assets/proj.png");
+
+	map = new Map("terrain", 3, 32);
 	//ecs implementation
 
 	map->LoadMap("assets/map.map", 25, 20);
 
-	player.addComponent<TransformComponent>(4);
-	player.addComponent<SpriteComponent>("assets/player_anims.png", true);
+	player.addComponent<TransformComponent>(400.0f, 640.0f, 32 , 32, 4);
+	player.addComponent<SpriteComponent>("player", true);
 	player.addComponent<KeyboardController>();
 	player.addComponent<ColliderComponent>("player");
-	player.addGroup(groupPlayer);
+	player.addGroup(groupPlayers);
+
+	assets->CreateProjectile(Vector2D(100, 100), Vector2D(0,1),1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(300, 100), Vector2D(0, 1), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(555, 100), Vector2D(0, 1), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(777, 100), Vector2D(0, 1), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(999, 100), Vector2D(0, 1), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(1011, 100), Vector2D(0, 1), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(1222, 100), Vector2D(0, 1), 1200, 2, "projectile");
+
+	assets->CreateProjectile(Vector2D(100, 100), Vector2D(1, 0), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(100, 300), Vector2D(1, 0), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(100, 555), Vector2D(1, 0), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(100, 777), Vector2D(1, 0), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(100, 999), Vector2D(1, 0), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(100, 1011), Vector2D(1, 0), 1200, 2, "projectile");
+	assets->CreateProjectile(Vector2D(100, 1222), Vector2D(1, 0), 1200, 2, "projectile");
+
 
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
-auto& players(manager.getGroup(Game::groupPlayer));
+auto& players(manager.getGroup(Game::groupPlayers));
 auto& colliders(manager.getGroup(Game::groupColliders));
+auto& projectiles(manager.getGroup(Game::groupProjectiles));
+auto& gameend(manager.getGroup(Game::groupGameState));
+
+
 void Game::handleEvents()
 {
-
+	
 	SDL_PollEvent(&event);
 
 	switch (event.type)
@@ -79,12 +104,13 @@ void Game::handleEvents()
 	}
 }
 
+
 void Game::update()
-{
+{	
 
-	SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;	
+	SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
 	Vector2D playerPos = player.getComponent<TransformComponent>().position;
-
+	manager.refresh();
 	manager.update();
 
 	for (auto& c : colliders)
@@ -96,10 +122,36 @@ void Game::update()
 		}
 	}
 
-	camera.x = player.getComponent<TransformComponent>().position.x - 400;
-	camera.y = player.getComponent<TransformComponent>().position.y - 320;
+	for (auto& p : projectiles)
+	{
+		if (Collision::AABB(player.getComponent<ColliderComponent>().collider, p->getComponent<ColliderComponent>().collider))
+		{
+			std::cout << "Hit player!" << std::endl;
+			p->destroy();
+			isEnd = true;
+			
+			std::cout << "Game end";
+			SDL_Surface* tempSurface = IMG_Load("assets/Lose.png");
+			SDL_Texture* tex = SDL_CreateTextureFromSurface(Game::renderer, tempSurface);
+			SDL_RenderCopy(renderer, tex, NULL, NULL);
+			SDL_RenderPresent(renderer);
+		}
+	}
 
-	//limit the camera to the map corners
+	if (playerPos.x >= 1500 && (playerPos.y >= 100 && playerPos.y <= 150))
+	{
+		isEnd = true;
+		SDL_RenderClear(renderer);
+		SDL_Surface* tempSurface = IMG_Load("assets/Win.png");
+		SDL_Texture* tex = SDL_CreateTextureFromSurface(Game::renderer, tempSurface);
+		
+		SDL_RenderCopy(renderer, tex, NULL, NULL);
+		SDL_RenderPresent(renderer);
+	}
+
+	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400);
+	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320);
+
 	if (camera.x < 0)
 		camera.x = 0;
 	if (camera.y < 0)
@@ -107,14 +159,15 @@ void Game::update()
 	if (camera.x > camera.w)
 		camera.x = camera.w;
 	if (camera.y > camera.h)
-		camera.y = camera.h; 
+		camera.y = camera.h;
 }
-
-
-
 
 void Game::render()
 {
+	if (isEnd == true)
+	{
+		return; /// game end, no need to render
+	}
 	SDL_RenderClear(renderer);
 	for (auto& t : tiles)
 	{
@@ -128,12 +181,15 @@ void Game::render()
 
 	for (auto& p : players)
 	{
-		p->draw();	
+		p->draw();
 	}
-	
-	
-	SDL_RenderPresent(renderer);
 
+	for (auto& p : projectiles)
+	{
+		p->draw();
+	}
+
+	SDL_RenderPresent(renderer);
 }
 
 void Game::clean()
@@ -142,4 +198,3 @@ void Game::clean()
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
 }
-
